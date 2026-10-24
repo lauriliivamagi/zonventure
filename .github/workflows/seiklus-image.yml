@@ -1,0 +1,60 @@
+name: Seiklus image
+
+# Builds the image the seiklus deployment runs (deploy/seiklus) on every
+# push to the seiklus branch. Upstream's release flow (ci.yml) is left
+# alone; this job skips the test suite so a fix reaches the server in a
+# few minutes.
+on:
+  push:
+    branches: [seiklus]
+
+permissions:
+  contents: read
+  packages: write
+
+# A newer push supersedes a build still running; only the newest image
+# matters.
+concurrency:
+  group: seiklus-image
+  cancel-in-progress: true
+
+jobs:
+  image:
+    name: Build and push
+    runs-on: ubuntu-latest
+    steps:
+      # Actions are pinned to commit SHAs: this job can push to the
+      # package the server pulls, so a moved tag must not change what runs.
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+        with:
+          # `git describe` needs tags and full history, as in ci.yml.
+          fetch-depth: 0
+
+      - name: version
+        id: version
+        run: |
+          echo "version=$(git describe --tags --always)" >> "$GITHUB_OUTPUT"
+          echo "short=$(git rev-parse --short HEAD)" >> "$GITHUB_OUTPUT"
+
+      - uses: docker/setup-buildx-action@8d2750c68a42422c14e847fe6c8ac0403b4cbd6f # v3.12.0
+
+      - uses: docker/login-action@c94ce9fb468520275223c153574b00df6fe4bcc9 # v3.7.0
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      # :seiklus is what the stack runs; :sha-<short> is kept for rollback.
+      # The source label links the package to this repo.
+      - uses: docker/build-push-action@10e90e3645eae34f1e60eeb005ba3a3d33f178e8 # v6.19.2
+        with:
+          context: .
+          platforms: linux/amd64
+          push: true
+          build-args: VERSION=${{ steps.version.outputs.version }}
+          tags: |
+            ghcr.io/${{ github.repository }}:seiklus
+            ghcr.io/${{ github.repository }}:sha-${{ steps.version.outputs.short }}
+          labels: org.opencontainers.image.source=https://github.com/${{ github.repository }}
+          cache-from: type=gha,scope=seiklus
+          cache-to: type=gha,scope=seiklus,mode=max
