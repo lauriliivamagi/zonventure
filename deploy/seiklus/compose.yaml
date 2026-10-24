@@ -1,0 +1,79 @@
+# Seiklus stack: Postgres + the image the seiklus branch publishes, run
+# as a Git-backed Portainer stack. See README.md next to this file.
+#
+# Unlike the root compose.yaml, nothing is built here and the app
+# publishes no host port: it joins the tunnel's Docker network and the
+# tunnel reaches it as http://seiklus-app:8080. Every value without a
+# default is required, so a stack missing one refuses to start instead
+# of running with an empty password or an untrusted proxy.
+
+services:
+  db:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    logging: &logging
+      options:
+        max-size: 10m
+        max-file: "5"
+    # Watchtower updates the host nightly; a restart mid-event would drop
+    # every team's connection. Update this stack by hand instead.
+    labels: &no-watchtower
+      com.centurylinklabs.watchtower.enable: "false"
+    environment:
+      POSTGRES_DB: zv
+      POSTGRES_USER: zv
+      # Hex only: it is also spliced into DATABASE_URL below. Postgres
+      # reads it once, into an empty volume; changing it later does not
+      # change the database's password.
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?set POSTGRES_PASSWORD (openssl rand -hex 24)}
+    volumes:
+      - pg_data:/var/lib/postgresql/data
+      # pg_dump target, see README.md → Backup.
+      - backups:/backups
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U zv -d zv"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+  app:
+    image: ghcr.io/lauriliivamagi/zonventure:${ZV_IMAGE_TAG:-seiklus}
+    # Fixed so the tunnel route can name it.
+    container_name: seiklus-app
+    restart: unless-stopped
+    logging: *logging
+    labels: *no-watchtower
+    # Shutdown waits for in-flight webhooks (up to 35s) and the other
+    # workers; Docker's default 10s would SIGKILL mid-drain.
+    stop_grace_period: 50s
+    depends_on:
+      db:
+        condition: service_healthy
+    networks:
+      - default
+      - tunnel
+    environment:
+      DATABASE_URL: postgres://zv:${POSTGRES_PASSWORD}@db:5432/zv?sslmode=disable
+      # First-run admin, username:password. A no-op once an admin exists;
+      # change the password in the app right after the first sign-in.
+      ZV_SEED_ADMIN: ${ZV_SEED_ADMIN:?set ZV_SEED_ADMIN to <username>:<password>}
+      # Wraps two-factor secrets at rest; losing it forces re-enrolment.
+      ZV_TOTP_KEY: ${ZV_TOTP_KEY:?set ZV_TOTP_KEY (openssl rand -base64 32)}
+      ZV_PUBLIC_URL: ${ZV_PUBLIC_URL:-https://seiklus.hypersuper.link}
+      # The tunnel network's subnet: requests arrive from the tunnel
+      # container, and only a trusted peer's X-Forwarded-* is honoured.
+      ZV_TRUSTED_PROXIES: ${ZV_TRUSTED_PROXIES:?set ZV_TRUSTED_PROXIES to the tunnel network's subnet}
+      # The update check compares against upstream's releases, which this
+      # build never matches.
+      ZV_CHANGELOG_URL: ""
+      ZV_LOG_FORMAT: text
+
+networks:
+  # The tunnel's own network, created outside this stack.
+  tunnel:
+    external: true
+    name: ${TUNNEL_NETWORK:?set TUNNEL_NETWORK to the tunnel container's Docker network}
+
+volumes:
+  pg_data:
+  backups:
