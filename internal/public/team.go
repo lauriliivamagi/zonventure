@@ -77,7 +77,7 @@ func fileSize(n int64, lang string) string {
 		return fmt.Sprintf("%d MB", (n+500_000)/1_000_000)
 	case n >= 1_000_000:
 		mb := fmt.Sprintf("%.1f MB", float64(n)/1_000_000)
-		if lang == "sv" {
+		if lang == "sv" || lang == "et" {
 			mb = strings.Replace(mb, ".", ",", 1)
 		}
 		return mb
@@ -125,7 +125,7 @@ func (h *Handlers) TeamShare(w http.ResponseWriter, r *http.Request) {
 	// The page speaks the visitor's language; the adventure's own words
 	// (its title) are in the language the team plays in, or the
 	// visitor's for a team that hasn't chosen one.
-	view.Lang = emailtpl.LangFromRequest(r)
+	view.Lang = emailtpl.LangFromRequestIn(r, teamLangs)
 	err := h.DB.QueryRowContext(r.Context(), `
 		SELECT t.id, t.event_id, t.name, COALESCE(NULLIF(g.graph->'translations'->COALESCE(NULLIF(t.lang, ''), $2)->>'meta:title', ''), a.title),
 		       (t.avatar_mime_type IS NOT NULL)::int AS has_avatar,
@@ -476,13 +476,73 @@ var teamSV = map[string]string{
 	"Awaiting start":           "Väntar på start",
 }
 
-// teamT is the team page's words in lang: Swedish where there are
-// any, else as written.
+// teamET is the team page in Estonian, by its English words. Upstream
+// has no Estonian; this fork's guests are in Estonia, and this page is
+// the first thing they open.
+var teamET = map[string]string{
+	"Skip to start":      "Mine sisu juurde",
+	"Your adventure":     "Sinu seiklus",
+	"Ready when you are": "Alusta, kui oled valmis",
+	"Walk, look around, and solve your way through — at your own pace. Tap below when you're ready to begin.": "Kõnni, vaata ringi ja lahenda ülesanded – omas tempos. Kui oled valmis, puuduta allolevat nuppu.",
+	"Start the adventure →":                            "Alusta seiklust →",
+	"Playing as a group? Get everyone in, then begin.": "Mängid koos teistega? Too kõik mängu ja alusta siis.",
+	"Everyone joins":                                   "Kõik liituvad",
+	"Each person opens the camera on their phone and points it at this square:": "Igaüks avab oma telefoni kaamera ja suunab selle sellele ruudule:",
+	"QR code to join this team": "QR-kood sellesse võistkonda liitumiseks",
+	"Tap Start playing":         "Puuduta nuppu „Alusta mängu“",
+	"On every phone — including yours — tap the button below. That's it, you're playing together.": "Puudutage igas telefonis – ka sinu omas – allolevat nuppu. Ongi kõik, mängite koos.",
+	"Start playing →":                              "Alusta mängu →",
+	"Playing on your own? Just tap Start playing.": "Mängid üksi? Puuduta lihtsalt nuppu „Alusta mängu“.",
+	"This adventure has no player spots yet.":      "Selles seikluses pole veel mängijakohti.",
+	"Add a team photo":                             "Lisa võistkonna foto",
+	"change":                                       "muuda",
+	"+ photo":                                      "+ foto",
+	"Remove photo":                                 "Eemalda foto",
+	"Starts in":                                    "Alguseni",
+	"day":                                          "päev",
+	"days":                                         "päeva",
+	"Tap your name to open your link":              "Puuduta oma nime, et oma link avada",
+	"Each link is for one person. Don't pass yours on — your teammates have their own below.": "Iga link on ühele inimesele. Ära anna oma linki edasi – võistkonnakaaslaste lingid on allpool.",
+	"Open →":                           "Ava →",
+	"Playing on a phone · take over →": "Kasutusel ühes telefonis · võta üle →",
+	"No members on this team yet. Ask your arranger to add you.": "Selles võistkonnas pole veel liikmeid. Palu korraldajal sind lisada.",
+	"Share this team page": "Jaga võistkonna lehte",
+	"Team page link":       "Võistkonna lehe link",
+	"Copy":                 "Kopeeri",
+	"QR code to this page": "Selle lehe QR-kood",
+	"Teammates who scan this land here and tap their own name.":                "Võistkonnakaaslased, kes selle skannivad, jõuavad siia ja puudutavad oma nime.",
+	"If your name isn't listed, ask the arranger to add you.":                  "Kui sinu nime pole loendis, palu korraldajal sind lisada.",
+	"Files from the organisers":                                                "Failid korraldajatelt",
+	"Download them before you set off. They are also in the menu of the game.": "Laadi need alla enne teeleasumist. Need on ka mängu menüüs.",
+	"Everyone's already joined this team. Ask whoever's hosting.":              "Kõik on sellesse võistkonda juba liitunud. Küsi mängujuhilt.",
+	"This game can't start just now. Ask the organiser, then try again.":       "Seda mängu ei saa praegu alustada. Küsi korraldajalt ja proovi siis uuesti.",
+	"Couldn't join — please try again.":                                        "Liitumine ebaõnnestus – proovi uuesti.",
+	"Couldn't reach the server. Check your connection.":                        "Serveriga ei saanud ühendust. Kontrolli ühendust.",
+	"upload failed":            "üleslaadimine ebaõnnestus",
+	"remove failed":            "eemaldamine ebaõnnestus",
+	"Link copied":              "Link on kopeeritud",
+	"Press Ctrl/Cmd+C to copy": "Kopeerimiseks vajuta Ctrl/Cmd+C",
+	"Event":                    "Üritus",
+	"Completed":                "Lõppenud",
+	"Paused":                   "Peatatud",
+	"Live now":                 "Käib praegu",
+	"Started ":                 "Algas ",
+	"Starting…":                "Algab…",
+	"Awaiting start":           "Ootab algust",
+}
+
+// teamLangs are the languages the team page speaks: the emails', and
+// Estonian.
+var teamLangs = append([]string{"et"}, emailtpl.Languages...)
+
+// teamWords are the team page's words by language, English being the keys.
+var teamWords = map[string]map[string]string{"sv": teamSV, "et": teamET}
+
+// teamT is the team page's words in lang: Swedish or Estonian where
+// there are any, else as written.
 func teamT(lang, s string) string {
-	if lang == "sv" {
-		if v, ok := teamSV[s]; ok {
-			return v
-		}
+	if v, ok := teamWords[lang][s]; ok {
+		return v
 	}
 	return s
 }

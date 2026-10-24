@@ -18,15 +18,24 @@ import (
 // Limitations: only finds string-literal arguments to t(); a dynamic
 // argument like t(state.flag) escapes the lexer. Those are rare and
 // listed in the audit comment below.
+//
+// These three pages are what players see, so this fork checks Estonian
+// (et.json, which holds only their strings) the same way.
 func TestI18nCompleteness(t *testing.T) {
-	pages := []string{"web/live.html", "web/recap.html", "web/play.html"}
-	raw, err := webFS.ReadFile("web/locales/web/sv.json")
-	if err != nil {
-		t.Fatalf("read sv.json: %v", err)
+	for _, lang := range []string{"sv", "et"} {
+		t.Run(lang, func(t *testing.T) { testI18nCompleteness(t, lang) })
 	}
-	var sv map[string]string
-	if err := json.Unmarshal(raw, &sv); err != nil {
-		t.Fatalf("parse sv.json: %v", err)
+}
+
+func testI18nCompleteness(t *testing.T, lang string) {
+	pages := []string{"web/live.html", "web/recap.html", "web/play.html"}
+	raw, err := webFS.ReadFile("web/locales/web/" + lang + ".json")
+	if err != nil {
+		t.Fatalf("read %s.json: %v", lang, err)
+	}
+	var catalog map[string]string
+	if err := json.Unmarshal(raw, &catalog); err != nil {
+		t.Fatalf("parse %s.json: %v", lang, err)
 	}
 
 	// Regex matches the first string-literal argument to t(...). Both
@@ -67,7 +76,7 @@ func TestI18nCompleteness(t *testing.T) {
 		if skip[k] {
 			continue
 		}
-		if _, ok := sv[k]; !ok {
+		if _, ok := catalog[k]; !ok {
 			missing = append(missing, k)
 		}
 	}
@@ -81,7 +90,7 @@ func TestI18nCompleteness(t *testing.T) {
 				}
 			}
 		}
-		t.Logf("missing %d Swedish translation(s):", len(missing))
+		t.Logf("missing %d %s translation(s):", len(missing), lang)
 		for _, k := range missing {
 			t.Logf("  %q", k)
 		}

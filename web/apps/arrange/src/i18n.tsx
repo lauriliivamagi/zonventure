@@ -11,6 +11,7 @@ import { trailSv } from "@zonventure/trail";
 import classic from "../../../../internal/server/web/locales/web/sv.json";
 import sv from "./locales/sv.json";
 import contentSv from "./locales/content/sv.json";
+import contentEt from "./locales/content/et.json";
 import type { Node } from "@zonventure/graph";
 
 /**
@@ -41,7 +42,8 @@ export function contentT(lang: string | undefined): I18n["t"] {
   return lang ? new I18n(contentCatalogs, lang).t : instance.t;
 }
 // Content words that read differently as UI ("Solved": "Lösta", a count) win here.
-const contentCatalogs = { en: {}, sv: { ...catalogs.sv, ...contentSv } };
+// The console has no Estonian, so an Estonian adventure's words are these alone.
+const contentCatalogs = { en: {}, sv: { ...catalogs.sv, ...contentSv }, et: contentEt };
 
 /** A new step's default route and group names, in the adventure's language. */
 export function routesIn(n: Node, lang: string | undefined): Node {

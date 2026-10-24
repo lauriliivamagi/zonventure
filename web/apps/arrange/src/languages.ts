@@ -5,6 +5,7 @@
 export const LANGUAGE_NAMES: Record<string, string> = {
   sv: "Svenska",
   en: "English",
+  et: "Eesti",
   de: "Deutsch",
   fi: "Suomi",
   no: "Norsk",

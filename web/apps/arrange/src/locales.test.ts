@@ -37,3 +37,18 @@ test("every console string has a Swedish translation", () => {
   }
   assert.deepEqual([...missing].sort(), []);
 });
+
+// Words the console writes into an Estonian adventure — default team and
+// player names, route labels — are what players read, so this fork has
+// them in Estonian although the console itself is not.
+test("every content word has an Estonian translation", () => {
+  const read = (p: string) => JSON.parse(readFileSync(join(src, p), "utf8")) as Record<string, string>;
+  const et = read("locales/content/et.json");
+  const words = new Set(Object.keys(read("locales/content/sv.json")));
+  for (const file of sources(src)) {
+    for (const m of readFileSync(file, "utf8").matchAll(/(?:\bct|contentT\([^)]*\))\(\s*"((?:[^"\\]|\\.)*)"/g)) {
+      words.add(JSON.parse(`"${m[1]}"`) as string);
+    }
+  }
+  assert.deepEqual([...words].filter((w) => !(w in et)).sort(), []);
+});

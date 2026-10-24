@@ -7,14 +7,16 @@ import {
 import { I18n } from "@zonventure/i18n";
 import en from "./locales/en.json";
 import sv from "./locales/sv.json";
+import et from "./locales/et.json";
 
 /**
  * Catalogs. English holds only a walk's words ("tour|" keys), because
  * the key is the English source string. Swedish is the primary market,
  * so every player-facing string — this app's and @zonventure/play-ui's
- * — has a translation here.
+ * — has a translation here. This fork's guests are in Estonia, so
+ * Estonian has every one too.
  */
-const catalogs = { en, sv };
+const catalogs = { en, sv, et };
 
 const instance = new I18n(catalogs);
 const I18nContext = createContext(instance);

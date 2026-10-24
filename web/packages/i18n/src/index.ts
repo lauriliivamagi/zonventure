@@ -36,6 +36,7 @@ export interface LanguageLabel {
 export const LANGUAGE_LABELS: Record<string, LanguageLabel> = {
   en: { flag: "🇬🇧", name: "English" },
   sv: { flag: "🇸🇪", name: "Svenska" },
+  et: { flag: "🇪🇪", name: "Eesti" },
   nb: { flag: "🇳🇴", name: "Norsk bokmål" },
   da: { flag: "🇩🇰", name: "Dansk" },
   fi: { flag: "🇫🇮", name: "Suomi" },
@@ -62,8 +63,12 @@ export function flagFor(code: string | null | undefined): string {
 
 export const LOCALE_STORAGE_KEY = "zv-lang";
 
-/** Swedish is the primary market; ambiguous or unsupported falls to it. */
-export const DEFAULT_LOCALE = "sv";
+/**
+ * Ambiguous or unsupported falls to English. Upstream falls to Swedish,
+ * its primary market; this fork's guests are in Estonia, where an
+ * untranslated screen is better read in English.
+ */
+export const DEFAULT_LOCALE = "en";
 
 export class I18n {
   private catalogs: Record<Locale, Catalog>;
@@ -174,11 +179,7 @@ export function interpolate(template: string, vars: Vars): string {
 
 /**
  * Choose a starting locale: an explicit stored choice, else the best
- * browser match, else Swedish.
- *
- * Defaulting to Swedish rather than English is deliberate. Swedish is
- * the primary market, and the old default sent ambiguous visitors to
- * English, which is part of why the Swedish catalog lagged.
+ * browser match, else DEFAULT_LOCALE.
  */
 export function pickInitialLocale(available: Locale[]): Locale {
   const has = (l: string) => available.includes(l);

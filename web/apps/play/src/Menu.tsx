@@ -5,7 +5,7 @@ import type { I18n } from "@zonventure/i18n";
 import { Files } from "./Files.tsx";
 
 /** Each language in its own words, so a player finds their own. */
-const LANG_NAMES: Record<string, string> = { sv: "Svenska", en: "English", de: "Deutsch", fi: "Suomi", no: "Norsk", da: "Dansk", fr: "Français", es: "Español" };
+const LANG_NAMES: Record<string, string> = { sv: "Svenska", en: "English", et: "Eesti", de: "Deutsch", fi: "Suomi", no: "Norsk", da: "Dansk", fr: "Français", es: "Español" };
 
 /**
  * The player's menu: who they are on the team, the team's name, their

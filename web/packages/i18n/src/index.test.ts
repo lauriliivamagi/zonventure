@@ -156,6 +156,10 @@ describe("flagFor", () => {
     assert.equal(flagFor("  SV "), "🇸🇪");
   });
 
+  test("knows Estonian", () => {
+    assert.equal(flagFor("et"), "🇪🇪");
+  });
+
   test("returns empty for an unknown tag", () => {
     assert.equal(flagFor("tlh"), "");
   });
@@ -208,28 +212,35 @@ describe("pickInitialLocale", () => {
     );
   });
 
-  // Swedish is the primary market, so an *ambiguous* visitor — one
-  // whose languages we do not speak — lands on Swedish. The old
-  // runtime sent them to English, which is part of why the Swedish
-  // catalog lagged behind.
-  test("defaults to Swedish when no browser language matches", () => {
+  // This fork's guests are in Estonia, so an *ambiguous* visitor —
+  // one whose languages we do not speak — reads English rather than
+  // Swedish.
+  test("defaults to English when no browser language matches", () => {
+    assert.equal(DEFAULT_LOCALE, "en");
     assert.equal(
-      withLanguages(["de", "fr"], () => pickInitialLocale(["en", "sv"])),
-      DEFAULT_LOCALE,
-    );
-  });
-
-  test("defaults to Swedish when there is no navigator at all", () => {
-    assert.equal(
-      withLanguages(undefined, () => pickInitialLocale(["en", "sv"])),
-      DEFAULT_LOCALE,
-    );
-  });
-
-  test("falls back to the first available when Swedish is absent", () => {
-    assert.equal(
-      withLanguages(["de"], () => pickInitialLocale(["en", "fr"])),
+      withLanguages(["de", "fr"], () => pickInitialLocale(["en", "sv", "et"])),
       "en",
+    );
+  });
+
+  test("defaults to English when there is no navigator at all", () => {
+    assert.equal(
+      withLanguages(undefined, () => pickInitialLocale(["en", "sv", "et"])),
+      "en",
+    );
+  });
+
+  test("an Estonian phone reads Estonian", () => {
+    assert.equal(
+      withLanguages(["et-EE", "et"], () => pickInitialLocale(["en", "sv", "et"])),
+      "et",
+    );
+  });
+
+  test("falls back to the first available when English is absent", () => {
+    assert.equal(
+      withLanguages(["de"], () => pickInitialLocale(["sv", "fr"])),
+      "sv",
     );
   });
 });

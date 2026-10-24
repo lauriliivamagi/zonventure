@@ -89,6 +89,20 @@ func TestTeamShare_PageRendersSlots(t *testing.T) {
 		}
 	}
 
+	// This fork's guests are in Estonia: an Estonian phone reads it in
+	// Estonian.
+	req, _ = http.NewRequest("GET", ts.URL+"/team/"+team.Token, nil)
+	req.Header.Set("Accept-Language", "et-EE,et;q=0.9,en;q=0.8")
+	if resp, err := anon.c.Do(req); err != nil {
+		t.Fatal(err)
+	} else {
+		b, _ := io.ReadAll(resp.Body)
+		resp.Body.Close()
+		if !strings.Contains(string(b), `<html lang="et">`) || !strings.Contains(string(b), "Mine sisu juurde") {
+			t.Errorf("an Estonian browser should get the team page in Estonian")
+		}
+	}
+
 	if status, _ := getRaw(t, anon, "/team/doesnotexist"); status != 404 {
 		t.Errorf("unknown team token = %d, want 404", status)
 	}
