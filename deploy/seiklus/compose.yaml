@@ -68,6 +68,16 @@ services:
       ZV_TIME_ZONE: ${ZV_TIME_ZONE:-Europe/Tallinn}
       ZV_CURRENCY: ${ZV_CURRENCY:-eur}
       ZV_SHIP_COUNTRIES: ${ZV_SHIP_COUNTRIES:-EE}
+      # Mail through Resend's SMTP. Off, every mail only logged, until
+      # ZV_SMTP_HOST is set; set it together with ZV_SMTP_PASS (an API
+      # key) and ZV_SMTP_FROM (an address on a domain verified in
+      # Resend), or the app refuses to start.
+      ZV_SMTP_HOST: ${ZV_SMTP_HOST:-}
+      ZV_SMTP_PORT: ${ZV_SMTP_PORT:-465}
+      ZV_SMTP_TLS: ${ZV_SMTP_TLS:-tls}
+      ZV_SMTP_USER: ${ZV_SMTP_USER:-resend}
+      ZV_SMTP_PASS: ${ZV_SMTP_PASS:-}
+      ZV_SMTP_FROM: ${ZV_SMTP_FROM:-}
       # The tunnel network's subnet: requests arrive from the tunnel
       # container, and only a trusted peer's X-Forwarded-* is honoured.
       ZV_TRUSTED_PROXIES: ${ZV_TRUSTED_PROXIES:?set ZV_TRUSTED_PROXIES to the tunnel network's subnet}

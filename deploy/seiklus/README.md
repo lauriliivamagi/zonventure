@@ -31,6 +31,10 @@ Set these on the stack. Keep the secrets in a password manager too.
 | `ZV_TIME_ZONE` | no | Default `Europe/Tallinn`. An organisation that has saved its own time zone (Settings → Organisation) keeps it. |
 | `ZV_CURRENCY` | no | Default `eur`. Set it before the first sale: saved amounts keep their numbers, not their value. |
 | `ZV_SHIP_COUNTRIES` | no | Default `EE`: where printed letters are posted. |
+| `ZV_SMTP_HOST` | no | `smtp.resend.com` to send mail. Empty (the default) sends nothing and only logs each mail. Set it together with the next two, or the app won't start. |
+| `ZV_SMTP_PASS` | with the host | A Resend API key with sending access only. |
+| `ZV_SMTP_FROM` | with the host | `Name <address>` on a domain verified in Resend. |
+| `ZV_SMTP_PORT`, `ZV_SMTP_TLS`, `ZV_SMTP_USER` | no | Default `465`, `tls`, `resend`. |
 
 ## Tunnel
 
