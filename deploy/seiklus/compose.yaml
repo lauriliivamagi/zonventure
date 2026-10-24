@@ -60,6 +60,10 @@ services:
       # Wraps two-factor secrets at rest; losing it forces re-enrolment.
       ZV_TOTP_KEY: ${ZV_TOTP_KEY:?set ZV_TOTP_KEY (openssl rand -base64 32)}
       ZV_PUBLIC_URL: ${ZV_PUBLIC_URL:-https://seiklus.hypersuper.link}
+      # The name players and organisers see: page titles, the player
+      # header, emails ("… · saadetud keskkonnast Zonventure"). Unset is
+      # Zonventure.
+      ZV_SITE_NAME: ${ZV_SITE_NAME:-}
       # Estonia, not upstream's Sweden: maps open on Tartu's Town Hall
       # Square, an organisation that hasn't picked a time zone writes
       # start times in Estonian time, and prices are in euros. Set the

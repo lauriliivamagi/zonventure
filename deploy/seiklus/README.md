@@ -27,6 +27,7 @@ Set these on the stack. Keep the secrets in a password manager too.
 | `ZV_TRUSTED_PROXIES` | yes | That network's subnet. |
 | `ZV_IMAGE_TAG` | no | Default `seiklus`; `sha-<short>` to pin a build. |
 | `ZV_PUBLIC_URL` | no | Default `https://seiklus.hypersuper.link`. |
+| `ZV_SITE_NAME` | no | Unset: `Zonventure`. The name players and organisers see in page titles, the player header, emails ("… · saadetud keskkonnast Zonventure") and new authenticator entries, for example `Seiklus`. |
 | `ZV_MAP_CENTER` | no | Default `58.379783,26.722095`, Tartu Town Hall Square: where a map opens with nothing to show. |
 | `ZV_TIME_ZONE` | no | Default `Europe/Tallinn`. An organisation that has saved its own time zone (Settings → Organisation) keeps it. |
 | `ZV_CURRENCY` | no | Default `eur`. Set it before the first sale: saved amounts keep their numbers, not their value. |

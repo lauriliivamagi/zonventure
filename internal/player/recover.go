@@ -152,7 +152,7 @@ func (h *Handlers) RecoverLink(w http.ResponseWriter, r *http.Request) {
 			seenEvents[l.EventID] = struct{}{}
 			uniqueEvents = append(uniqueEvents, l.EventID)
 		}
-		attachments := buildEventInviteAttachments(r.Context(), h, uniqueEvents)
+		attachments := buildEventInviteAttachments(r.Context(), h, uniqueEvents, lk.Lang)
 		msg := emailtpl.Message([]string{email}, subject, lk.Theme, lk.Brand, content)
 		msg.Attachments = attachments
 		if err := h.Mailer.Send(r.Context(), msg); err != nil {
@@ -169,8 +169,9 @@ func (h *Handlers) RecoverLink(w http.ResponseWriter, r *http.Request) {
 // id passed in. Failures (events with no scheduled_at, library load
 // issues) drop just the affected attachment rather than failing the
 // whole recovery. The caller is responsible for de-duplication; the
-// helper only does the format work.
-func buildEventInviteAttachments(ctx context.Context, h *Handlers, eventIDs []int64) []mailerpkg.Attachment {
+// helper only does the format work. Each entry's link is introduced in
+// lang, the email's.
+func buildEventInviteAttachments(ctx context.Context, h *Handlers, eventIDs []int64, lang string) []mailerpkg.Attachment {
 	if h == nil || h.DB == nil || h.Lib == nil {
 		return nil
 	}
@@ -183,7 +184,7 @@ func buildEventInviteAttachments(ctx context.Context, h *Handlers, eventIDs []in
 			}
 			continue
 		}
-		bytes, err := icscal.Bytes(evt)
+		bytes, err := icscal.Bytes(evt.Labelled(emailtpl.T(lang, "Join link:")))
 		if err != nil {
 			logx.Warn("player.recover_link.ics_render", "event", eventID, "err", err.Error())
 			continue

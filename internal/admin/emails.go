@@ -689,7 +689,7 @@ func (h *Handlers) emailTeamsCancelled(ctx context.Context, eventID int64) int {
 		if evtErr != nil || h.Mailer == nil {
 			return nil
 		}
-		e := words.calendarIn(evt, lang)
+		e := words.calendarIn(evt, l, lang)
 		e.Method, e.Status = "CANCEL", "CANCELLED"
 		b, err := icscal.Bytes(e)
 		if err != nil {

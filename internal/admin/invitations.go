@@ -137,7 +137,7 @@ func (h *Handlers) SendEventInvitations(w http.ResponseWriter, r *http.Request) 
 			continue
 		}
 		// In the language the team plays in.
-		if err := sendOneInvitation(r.Context(), h.Mailer, words.lookIn(l, t.Lang), t.Name, t.Email, publicURL, t.Slots, h.fileLinks(r.Context(), eventID, publicURL, t.Token, t.Lang), teamICS(words.calendarIn(evt, t.Lang), icsErr, eventID, publicURL, t.Token), start, words.placeIn(place, t.Lang), t.Invited); err != nil {
+		if err := sendOneInvitation(r.Context(), h.Mailer, words.lookIn(l, t.Lang), t.Name, t.Email, publicURL, t.Slots, h.fileLinks(r.Context(), eventID, publicURL, t.Token, t.Lang), teamICS(words.calendarIn(evt, l, t.Lang), icsErr, eventID, publicURL, t.Token), start, words.placeIn(place, t.Lang), t.Invited); err != nil {
 			logx.Warn("admin.invitations.send", "event", eventID, "team", t.ID, "err", err.Error())
 			failed++
 			continue
@@ -250,7 +250,7 @@ func (h *Handlers) sendTeamInvitation(w http.ResponseWriter, r *http.Request, te
 	l := h.eventLook(r.Context(), eventID)
 	words := h.eventWords(r.Context(), eventID)
 	start, place := h.inviteWhen(r.Context(), eventID)
-	if err := sendOneInvitation(r.Context(), h.Mailer, words.lookIn(l, teamLang), teamName, teamMail, publicURL, slots, h.fileLinks(r.Context(), eventID, publicURL, teamTok, teamLang), teamICS(words.calendarIn(evt, teamLang), icsErr, eventID, publicURL, teamTok), start, words.placeIn(place, teamLang), invited); err != nil {
+	if err := sendOneInvitation(r.Context(), h.Mailer, words.lookIn(l, teamLang), teamName, teamMail, publicURL, slots, h.fileLinks(r.Context(), eventID, publicURL, teamTok, teamLang), teamICS(words.calendarIn(evt, l, teamLang), icsErr, eventID, publicURL, teamTok), start, words.placeIn(place, teamLang), invited); err != nil {
 		logx.Warn("admin.invitations.team.send", "event", eventID, "team", teamID, "err", err.Error())
 		httpx.ServerErr(w, http.StatusBadGateway, "send failed", err)
 		return

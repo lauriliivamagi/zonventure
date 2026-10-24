@@ -50,6 +50,9 @@ type Event struct {
 	// Method is the iTIP method: PUBLISH when empty; CANCEL takes the
 	// entry off the calendars that hold it.
 	Method string
+	// JoinLabel introduces JoinURL in DESCRIPTION: "Join link:" when
+	// empty, else what Labelled set, in the invitee's language.
+	JoinLabel string
 }
 
 // BuildForEvent loads the event, its adventure, and the org name,
@@ -144,12 +147,32 @@ func BuildForEvent(ctx context.Context, db *sql.DB, lib *adventure.Library, even
 // one team's own page instead of the generic join page.
 func (e Event) WithJoinURL(u string) Event {
 	if e.JoinURL != "" {
-		e.Description = strings.Replace(e.Description, "Join link: "+e.JoinURL, "Join link: "+u, 1)
+		e.Description = strings.Replace(e.Description, e.joinLabel()+" "+e.JoinURL, e.joinLabel()+" "+u, 1)
 	} else {
-		e.Description += "\nJoin link: " + u
+		e.Description += "\n" + e.joinLabel() + " " + u
 	}
 	e.JoinURL = u
 	return e
+}
+
+// Labelled introduces the entry's link with label, "Join link:" in the
+// invitee's language; an empty one leaves it as it was.
+func (e Event) Labelled(label string) Event {
+	if label = strings.TrimSpace(label); label == "" {
+		return e
+	}
+	if e.JoinURL != "" {
+		e.Description = strings.Replace(e.Description, e.joinLabel()+" "+e.JoinURL, label+" "+e.JoinURL, 1)
+	}
+	e.JoinLabel = label
+	return e
+}
+
+func (e Event) joinLabel() string {
+	if e.JoinLabel != "" {
+		return e.JoinLabel
+	}
+	return "Join link:"
 }
 
 // Named is the entry called title and placed at location: one team's,

@@ -91,8 +91,10 @@ func (w eventWords) placeIn(place, lang string) string {
 // calendarIn is the event's calendar entry for a team that plays in
 // lang: named, and placed by its meeting place, in that language.
 // Without a meeting place it is placed by the start's coordinates,
-// which need no translating.
-func (w eventWords) calendarIn(evt icscal.Event, lang string) icscal.Event {
+// which need no translating. Its link is introduced in the language of
+// the team's emails, l's or lang.
+func (w eventWords) calendarIn(evt icscal.Event, l look, lang string) icscal.Event {
+	evt = evt.Labelled(emailtpl.T(w.lookIn(l, lang).Lang, "Join link:"))
 	if !w.speaks(lang) {
 		return evt
 	}

@@ -6,7 +6,7 @@ import { Card, EmailPreview, ErrorBox, Field, Loading, errorText, useLoad } from
 import "./organization-email.css";
 
 /** Languages by their own names, as a picker shows them. */
-const LANGUAGE_NAMES: Record<string, string> = { en: "English", sv: "Svenska" };
+const LANGUAGE_NAMES: Record<string, string> = { en: "English", sv: "Svenska", et: "Eesti" };
 
 /**
  * The look of the organisation's emails: one of the platform's themes,

@@ -253,6 +253,9 @@ func When(lang string, t time.Time, tz string) string {
 	if lang == "sv" {
 		return fmt.Sprintf("%s %d %s %d kl. %s (%s)", svWeekdays[t.Weekday()], t.Day(), svMonths[t.Month()-1], t.Year(), t.Format("15:04"), t.Format("MST"))
 	}
+	if lang == "et" {
+		return etWhen(t)
+	}
 	return t.Format("Monday 2 January 2006, 15:04 (MST)")
 }
 

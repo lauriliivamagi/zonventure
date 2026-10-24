@@ -738,6 +738,9 @@ func trailDate(lang string, t time.Time) string {
 		months := []string{"januari", "februari", "mars", "april", "maj", "juni", "juli", "augusti", "september", "oktober", "november", "december"}
 		return fmt.Sprintf("%d %s %d", t.Day(), months[t.Month()-1], t.Year())
 	}
+	if lang == "et" {
+		return emailtpl.EstonianDate(t)
+	}
 	return t.Format("2 January 2006")
 }
 

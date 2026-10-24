@@ -125,7 +125,7 @@ func (h *Handlers) TeamShare(w http.ResponseWriter, r *http.Request) {
 	// The page speaks the visitor's language; the adventure's own words
 	// (its title) are in the language the team plays in, or the
 	// visitor's for a team that hasn't chosen one.
-	view.Lang = emailtpl.LangFromRequestIn(r, teamLangs)
+	view.Lang = emailtpl.LangFromRequest(r)
 	err := h.DB.QueryRowContext(r.Context(), `
 		SELECT t.id, t.event_id, t.name, COALESCE(NULLIF(g.graph->'translations'->COALESCE(NULLIF(t.lang, ''), $2)->>'meta:title', ''), a.title),
 		       (t.avatar_mime_type IS NOT NULL)::int AS has_avatar,
@@ -530,10 +530,6 @@ var teamET = map[string]string{
 	"Starting…":                "Algab…",
 	"Awaiting start":           "Ootab algust",
 }
-
-// teamLangs are the languages the team page speaks: the emails', and
-// Estonian.
-var teamLangs = append([]string{"et"}, emailtpl.Languages...)
 
 // teamWords are the team page's words by language, English being the keys.
 var teamWords = map[string]map[string]string{"sv": teamSV, "et": teamET}

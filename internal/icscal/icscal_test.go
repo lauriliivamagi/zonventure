@@ -260,6 +260,25 @@ func TestWithJoinURL(t *testing.T) {
 	}
 }
 
+// A team's entry introduces its link in the team's language, before
+// and after it is pointed at the team's own page.
+func TestLabelled(t *testing.T) {
+	e := Event{JoinURL: "https://x.test/play", Description: "Org — Walk\n\nJoin link: https://x.test/play"}
+	got := e.Labelled("Liitumislink:").WithJoinURL("https://x.test/team/abc")
+	if got.Description != "Org — Walk\n\nLiitumislink: https://x.test/team/abc" {
+		t.Errorf("Labelled, then WithJoinURL = %q", got.Description)
+	}
+	if got := e.WithJoinURL("https://x.test/team/abc").Labelled("Liitumislink:"); got.Description != "Org — Walk\n\nLiitumislink: https://x.test/team/abc" {
+		t.Errorf("WithJoinURL, then Labelled = %q", got.Description)
+	}
+	if got := (Event{Description: "Org — Walk"}).Labelled("Liitumislink:").WithJoinURL("https://x.test/team/abc"); got.Description != "Org — Walk\nLiitumislink: https://x.test/team/abc" {
+		t.Errorf("without a join link = %q", got.Description)
+	}
+	if got := e.Labelled(""); got.Description != e.Description {
+		t.Errorf("an empty label changed it: %q", got.Description)
+	}
+}
+
 // ----- helpers -----
 
 func mustContain(t *testing.T, haystack, needle string) {

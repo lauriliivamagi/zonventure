@@ -6,21 +6,18 @@ import (
 	"strings"
 )
 
-// Languages are those emails are written in, the default first.
-var Languages = []string{"en", "sv"}
+// Languages are those emails are written in, the default first. This
+// fork's Estonian covers what players get (lang_et.go).
+var Languages = []string{"en", "sv", "et"}
 
 // Lang is the email language for a language tag: "sv-SE" is "sv"; one
 // emails are not written in is English.
-func Lang(tag string) string { return LangIn(tag, Languages) }
-
-// LangIn is Lang for something written in langs rather than in the
-// emails' Languages, such as a page that has more.
-func LangIn(tag string, langs []string) string {
+func Lang(tag string) string {
 	tag = strings.ToLower(strings.TrimSpace(tag))
 	if i := strings.IndexAny(tag, "-_"); i >= 0 {
 		tag = tag[:i]
 	}
-	for _, l := range langs {
+	for _, l := range Languages {
 		if l == tag {
 			return l
 		}
@@ -31,18 +28,15 @@ func LangIn(tag string, langs []string) string {
 // LangFromRequest is the language of whoever made r: the site's language
 // cookie if they chose one, else what their browser asks for. For the
 // emails a visitor asks for — signing up, resetting a password.
-func LangFromRequest(r *http.Request) string { return LangFromRequestIn(r, Languages) }
-
-// LangFromRequestIn is LangFromRequest for something written in langs.
-func LangFromRequestIn(r *http.Request, langs []string) string {
+func LangFromRequest(r *http.Request) string {
 	if c, err := r.Cookie("zv_lang"); err == nil && c.Value != "" {
-		return LangIn(c.Value, langs)
+		return Lang(c.Value)
 	}
 	al := r.Header.Get("Accept-Language")
 	if i := strings.IndexAny(al, ",;"); i >= 0 {
 		al = al[:i]
 	}
-	return LangIn(al, langs)
+	return Lang(al)
 }
 
 // T is s in lang, with args put in as fmt would. The English is the key;
@@ -59,6 +53,7 @@ func T(lang, s string, args ...any) string {
 
 // catalog is every email's words in each language but English.
 var catalog = map[string]map[string]string{
+	"et": etCatalog,
 	"sv": {
 		// The page around every email.
 		"%s · sent with %s": "%s · skickat med %s",
