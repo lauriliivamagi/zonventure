@@ -33,17 +33,31 @@ Set these on the stack. Keep the secrets in a password manager too.
 Route the hostname to `http://seiklus-app:8080`. The app publishes no
 host port; it is reachable only through the tunnel network.
 
+Add the route only after the first admin has signed in, changed the
+password and turned on two-factor sign-in, or keep the hostname behind a
+Cloudflare Access application until then. Until that point the admin's
+password is the one stored on the stack.
+
 ## Update
 
 1. Back up (below).
-2. Stack → Pull and redeploy, with "Re-pull image" on.
-3. Check that `https://seiklus.hypersuper.link/api/health` shows the new
-   `version` (`git describe --tags --always` of the pushed commit).
+2. Wait until the Seiklus image run for the pushed commit has finished
+   (the repository's Actions tab); a redeploy before that pulls the
+   previous build.
+3. Stack → Pull and redeploy, with "Re-pull image" on.
+4. Check that `https://seiklus.hypersuper.link/api/health` shows the new
+   `version` (`git describe --tags --always` of the pushed commit; it
+   ends in `g<short sha>`).
+
+The package is public, so pulls need no credentials. A pull failing
+with `denied: denied` means Portainer's ghcr.io registry entry carries a
+bad or expired token: update or remove that entry.
 
 ## Rollback
 
 Set `ZV_IMAGE_TAG=sha-<short>` to a previous build and update the stack.
-Database migrations do not roll back; restore a backup if one ran.
+Database migrations do not roll back; if the newer build ran one,
+restore a backup taken before it, into an empty database (see Backup).
 
 ## Backup
 
@@ -55,7 +69,19 @@ pg_dump -U zv -d zv --clean --if-exists --no-owner --no-privileges \
 ```
 
 The dumps contain players' names and positions; delete them after the
-event. Restore as in [operations.md → Restore](../../docs/operations.md#restore).
+event.
+
+To restore, stop the `app` container, then in the `db` console run:
+
+```sh
+gunzip -c /backups/<file>.sql.gz \
+  | psql -U zv -d zv --single-transaction -v ON_ERROR_STOP=1
+```
+
+and start `app` again. A dump made before a newer release migrated the
+database only goes into an empty database: first run
+`dropdb -U zv zv && createdb -U zv zv` in the same console. Background in
+[operations.md → Restore](../../docs/operations.md#restore).
 
 ## Event day
 
