@@ -294,7 +294,7 @@ func renderStoreEventPage(w http.ResponseWriter, r *http.Request, db *sql.DB, pu
 		[2]string{"{{HAS_START}}", boolAttr(startLat.Valid && startLng.Valid)},
 		[2]string{"{{START_LAT}}", coord(startLat)},
 		[2]string{"{{START_LNG}}", coord(startLng)},
-		[2]string{"{{START_MAP_URL}}", html.EscapeString(osmURL(startLat, startLng))},
+		[2]string{"{{START_MAP_URL}}", html.EscapeString(directionsURL(startLat, startLng))},
 		[2]string{"{{STORE_EVENT_START_MAP}}", html.EscapeString(s.StoreEventStartMap)},
 		[2]string{"{{STORE_EVENT_OPEN_MAP}}", html.EscapeString(s.StoreEventOpenMap)},
 		[2]string{"{{STORE_MAP_ZOOM_HINT}}", html.EscapeString(s.StoreMapZoomHint)},
@@ -361,14 +361,13 @@ func coord(v sql.NullFloat64) string {
 	return strconv.FormatFloat(v.Float64, 'f', 6, 64)
 }
 
-// osmURL opens a starting point on OpenStreetMap, as the player app's
-// map links do.
-func osmURL(lat, lng sql.NullFloat64) string {
+// directionsURL opens Google Maps' directions to a starting point: in
+// the Maps app on a phone that has it, else on the web.
+func directionsURL(lat, lng sql.NullFloat64) string {
 	if !lat.Valid || !lng.Valid {
 		return ""
 	}
-	la, lo := coord(lat), coord(lng)
-	return "https://www.openstreetmap.org/?mlat=" + la + "&mlon=" + lo + "#map=17/" + la + "/" + lo
+	return "https://www.google.com/maps/dir/?api=1&destination=" + coord(lat) + "," + coord(lng)
 }
 
 // formatStorePrice mirrors the JS helper on the listing page —

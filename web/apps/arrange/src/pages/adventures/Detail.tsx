@@ -119,7 +119,7 @@ function Detail({ a, shared, passes, reload }: { a: AdventureDetail; shared: boo
 
   const mapped = !designed && pins.length > 0;
   const openInMaps = start && (
-    <a className="btn adv-btn sm" href={`https://www.openstreetmap.org/?mlat=${start.lat}&mlon=${start.lng}#map=17/${start.lat}/${start.lng}`} target="_blank" rel="noopener" title={t.t("Open the starting point in maps")}>
+    <a className="btn adv-btn sm" href={`https://www.google.com/maps/search/?api=1&query=${start.lat},${start.lng}`} target="_blank" rel="noopener" title={t.t("Open the starting point in maps")}>
       <ExternalLink size={ICON.sm} aria-hidden />
       {t.t("Open in maps")}
     </a>

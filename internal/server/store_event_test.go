@@ -1,6 +1,7 @@
 package server
 
 import (
+	"database/sql"
 	"encoding/json"
 	"net/http"
 	"net/http/httptest"
@@ -296,6 +297,18 @@ func TestBuildAbsoluteURL(t *testing.T) {
 		if got != c.want {
 			t.Errorf("buildAbsoluteURL(%q, %q) = %q, want %q", c.base, c.path, got, c.want)
 		}
+	}
+}
+
+// TestDirectionsURL: the ticket page's starting point opens Google
+// Maps' directions to it, and an adventure without one has no link.
+func TestDirectionsURL(t *testing.T) {
+	at := func(v float64) sql.NullFloat64 { return sql.NullFloat64{Float64: v, Valid: true} }
+	if got, want := directionsURL(at(58.3797831), at(26.722095)), "https://www.google.com/maps/dir/?api=1&destination=58.379783,26.722095"; got != want {
+		t.Errorf("directionsURL = %q, want %q", got, want)
+	}
+	if got := directionsURL(sql.NullFloat64{}, at(26.722095)); got != "" {
+		t.Errorf("directionsURL without a latitude = %q, want none", got)
 	}
 }
 

@@ -147,7 +147,8 @@ function whereAmI(): Promise<GeolocationPosition> {
   });
 }
 
-const mapURL = (lat: number, lng: number) => `https://www.openstreetmap.org/?mlat=${lat}&mlon=${lng}#map=18/${lat}/${lng}`;
+/** A place on Google Maps, as the player's map links open it. */
+const mapURL = (lat: number, lng: number) => `https://www.google.com/maps/search/?api=1&query=${lat},${lng}`;
 
 /**
  * Putting the adventure's places in the host's park: walk to each spot

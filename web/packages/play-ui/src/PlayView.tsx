@@ -475,7 +475,8 @@ function Title({ view }: { view: play.View }) {
   return view.title ? <h1 className="pv-title">{view.title}</h1> : null;
 }
 
-const mapURL = (z: play.PlayZone) => `https://www.openstreetmap.org/?mlat=${z.lat}&mlon=${z.lng}#map=18/${z.lat}/${z.lng}`;
+/** The place on Google Maps: in the Maps app on a phone that has it, else on the web. */
+const mapURL = (z: play.PlayZone) => `https://www.google.com/maps/search/?api=1&query=${z.lat},${z.lng}`;
 
 function ZoneCard({ view, t, note, onStation, busy }: { view: play.View; t: Translate; note?: ReactNode; onStation?: (code: string) => void; busy?: boolean }) {
   const z = view.zone;
