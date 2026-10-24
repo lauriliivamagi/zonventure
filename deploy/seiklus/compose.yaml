@@ -60,6 +60,14 @@ services:
       # Wraps two-factor secrets at rest; losing it forces re-enrolment.
       ZV_TOTP_KEY: ${ZV_TOTP_KEY:?set ZV_TOTP_KEY (openssl rand -base64 32)}
       ZV_PUBLIC_URL: ${ZV_PUBLIC_URL:-https://seiklus.hypersuper.link}
+      # Estonia, not upstream's Sweden: maps open on Tartu's Town Hall
+      # Square, an organisation that hasn't picked a time zone writes
+      # start times in Estonian time, and prices are in euros. Set the
+      # currency before the first sale; saved amounts keep their numbers.
+      ZV_MAP_CENTER: ${ZV_MAP_CENTER:-58.379783,26.722095}
+      ZV_TIME_ZONE: ${ZV_TIME_ZONE:-Europe/Tallinn}
+      ZV_CURRENCY: ${ZV_CURRENCY:-eur}
+      ZV_SHIP_COUNTRIES: ${ZV_SHIP_COUNTRIES:-EE}
       # The tunnel network's subnet: requests arrive from the tunnel
       # container, and only a trusted peer's X-Forwarded-* is honoured.
       ZV_TRUSTED_PROXIES: ${ZV_TRUSTED_PROXIES:?set ZV_TRUSTED_PROXIES to the tunnel network's subnet}
