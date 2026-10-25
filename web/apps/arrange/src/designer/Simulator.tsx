@@ -6,6 +6,7 @@ import "@zonventure/play-ui/play-ui.css";
 import { I18n } from "@zonventure/i18n";
 import playEn from "../../../play/src/locales/en.json";
 import playSv from "../../../play/src/locales/sv.json";
+import playEt from "../../../play/src/locales/et.json";
 import { useT } from "../i18n.tsx";
 import { SpoofMap, type OtherPin, type Point } from "./SpoofMap.tsx";
 import { DevicePanel } from "./DevicePanel.tsx";
@@ -135,7 +136,7 @@ function useWindowHeight(): number {
 }
 
 /** The player app's own catalogs, so the phone reads as a team's would. */
-const PHONE_CATALOGS = { en: playEn as Record<string, string>, sv: playSv as Record<string, string> };
+const PHONE_CATALOGS = { en: playEn as Record<string, string>, sv: playSv as Record<string, string>, et: playEt as Record<string, string> };
 
 export function Simulator({ slug, graph, envelope, selected, mode, onMode, restart, onPosition, brand, title, bare, lang }: Props) {
   const t = useT();

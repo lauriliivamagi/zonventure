@@ -52,3 +52,14 @@ test("every content word has an Estonian translation", () => {
   }
   assert.deepEqual([...words].filter((w) => !(w in et)).sort(), []);
 });
+
+// The designer's simulated phone borrows the player app's catalogs, so an
+// adventure in any language the app speaks reads there as on a real phone.
+test("the simulated phone speaks every language of the player app", () => {
+  const sim = readFileSync(join(src, "designer/Simulator.tsx"), "utf8");
+  const phone = /const PHONE_CATALOGS = \{([^}]*)\}/.exec(sim)?.[1] ?? "";
+  const langs = readdirSync(new URL("../../play/src/locales/", import.meta.url).pathname)
+    .filter((f) => f.endsWith(".json"))
+    .map((f) => f.slice(0, -".json".length));
+  assert.deepEqual(langs.filter((l) => !new RegExp(`\\b${l}:`).test(phone)), []);
+});
