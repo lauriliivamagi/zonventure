@@ -38,7 +38,7 @@ export function SamplePreview({ brand }: { brand: play.Brand }) {
       setFeedback(
         right
           ? { tone: "good", text: tr("Correct!"), burst: { kind: "celebrate", head: tr("Correct!") } }
-          : { tone: "bad", text: tr("Not quite — try again."), burst: { kind: "rebuff", head: tr("Not quite") } },
+          : { tone: "bad", text: tr("That's not it. Try again."), burst: { kind: "rebuff", head: tr("Not quite") } },
       );
     };
     window.addEventListener(DEMO_ANSWER_EVENT, act);

@@ -63,3 +63,26 @@ test("the simulated phone speaks every language of the player app", () => {
     .map((f) => f.slice(0, -".json".length));
   assert.deepEqual(langs.filter((l) => !new RegExp(`\\b${l}:`).test(phone)), []);
 });
+
+// What the simulated phone shows speaks the phone's language, not the
+// console's: the simulator's own words on it — the line in the place
+// card before the team is on the map — included.
+test("the simulated phone's place note speaks the phone's language", () => {
+  const sim = readFileSync(join(src, "designer/Simulator.tsx"), "utf8");
+  const note = /const placeNote = [\s\S]*?\n  };/.exec(sim)?.[0] ?? "";
+  assert.ok(note.includes("tr("), "placeNote not found");
+  assert.ok(!/\bt\.t\(/.test(note), "placeNote uses the console's language");
+});
+
+test("every word a simulated phone says has every phone language", () => {
+  const sim = ["designer/Simulator.tsx", "designer/SamplePreview.tsx"].map((f) => readFileSync(join(src, f), "utf8")).join("\n");
+  const play = new URL("../../play/src/locales/", import.meta.url).pathname;
+  const read = (p: string) => (statSync(p, { throwIfNoEntry: false }) ? (JSON.parse(readFileSync(p, "utf8")) as Record<string, string>) : {});
+  const keys = [...sim.matchAll(/\btr\(\s*"((?:[^"\\]|\\.)*)"/g)].map((m) => JSON.parse(`"${m[1]}"`) as string);
+  const missing: string[] = [];
+  for (const lang of ["sv", "et"]) {
+    const words = { ...read(join(play, `${lang}.json`)), ...read(join(src, `locales/phone/${lang}.json`)) };
+    for (const k of keys) if (!(k in words)) missing.push(`${lang}: ${k}`);
+  }
+  assert.deepEqual(missing, []);
+});

@@ -7,6 +7,8 @@ import { I18n } from "@zonventure/i18n";
 import playEn from "../../../play/src/locales/en.json";
 import playSv from "../../../play/src/locales/sv.json";
 import playEt from "../../../play/src/locales/et.json";
+import phoneSv from "../locales/phone/sv.json";
+import phoneEt from "../locales/phone/et.json";
 import { useT } from "../i18n.tsx";
 import { SpoofMap, type OtherPin, type Point } from "./SpoofMap.tsx";
 import { DevicePanel } from "./DevicePanel.tsx";
@@ -135,8 +137,12 @@ function useWindowHeight(): number {
   return h;
 }
 
-/** The player app's own catalogs, so the phone reads as a team's would. */
-const PHONE_CATALOGS = { en: playEn as Record<string, string>, sv: playSv as Record<string, string>, et: playEt as Record<string, string> };
+/**
+ * The player app's own catalogs, so the phone reads as a team's would, with
+ * the simulator's few words of its own on the phone (locales/phone).
+ */
+const withSim = (play: Record<string, string>, sim: Record<string, string>) => ({ ...play, ...sim });
+const PHONE_CATALOGS = { en: playEn as Record<string, string>, sv: withSim(playSv, phoneSv), et: withSim(playEt, phoneEt) };
 
 export function Simulator({ slug, graph, envelope, selected, mode, onMode, restart, onPosition, brand, title, bare, lang }: Props) {
   const t = useT();
@@ -316,7 +322,7 @@ export function Simulator({ slug, graph, envelope, selected, mode, onMode, resta
       setFeedback(
         right
           ? { tone: "good", text: tr("Correct!"), burst: { kind: "celebrate", head: tr("Correct!") } }
-          : { tone: "bad", text: tr("Not quite — try again."), burst: { kind: "rebuff", head: tr("Not quite") } },
+          : { tone: "bad", text: tr("That's not it. Try again."), burst: { kind: "rebuff", head: tr("Not quite") } },
       );
     };
     window.addEventListener(DEMO_ANSWER_EVENT, act);
@@ -473,7 +479,7 @@ export function Simulator({ slug, graph, envelope, selected, mode, onMode, resta
   // "About N m away", as the player app says it — the same line the
   // phone shows a real team.
   const placeNote = (z: play.PlayZone) => {
-    if (!pos) return t.t("Put the team on the map to see how far it is.");
+    if (!pos) return tr("Put the team on the map to see how far it is.");
     const m = metresBetween(pos.lat, pos.lng, z.lat, z.lng);
     return m < 1000 ? tr("About {{m}} m away", { m: Math.max(1, Math.round(m)) }) : tr("About {{km}} km away", { km: Math.round(m / 100) / 10 });
   };
